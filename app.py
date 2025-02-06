@@ -1,10 +1,11 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
-from datetime import datetime
-import sqlite3
+from database import Database
 
 app = Flask(__name__)
 
 app.secret_key = 'ppaH4u5LWhP2fVa3eM3ySLzfFiAdrMcs'
+
+db = Database('database.db')
 
 def get_perguntas():
   return {
@@ -20,47 +21,9 @@ def get_perguntas():
     '10': 'O professor foi receptivo a dúvidas e questionamentos?'
   }
 
-# Configuração do banco de dados
-def init_db():
-  conn = sqlite3.connect('database.db')
-  cursor = conn.cursor()
-
-  cursor.execute('''
-    CREATE TABLE IF NOT EXISTS enquetes (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,           -- Chave primária com auto incremento
-      titulo TEXT NOT NULL,                           -- Coluna 'titulo' para armazenar o título da enquete
-      perguntas TEXT,                                 -- Coluna 'perguntas' para armazenar os IDs das perguntas como string
-      criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP   -- Coluna 'criado_em' com timestamp de criação
-    );
-  ''')
-
-  cursor.execute('''
-    CREATE TABLE IF NOT EXISTS usuarios (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,           -- Chave primária com auto incremento
-      nome TEXT NOT NULL,                             -- Coluna 'nome' para armazenar o nome do usuário
-      email TEXT NOT NULL UNIQUE,                     -- Coluna 'email', com a restrição UNIQUE para garantir que o email seja único
-      senha TEXT NOT NULL,                            -- Coluna 'senha' para armazenar a senha do usuário
-      criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP   -- Coluna 'criado_em' com timestamp de criação
-    );
-  ''')
-
-  cursor.execute('''
-    CREATE TABLE IF NOT EXISTS respostas (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,                               -- Chave primária com auto incremento
-      usuario_id INTEGER NOT NULL,                                        -- Chave estrangeira para 'usuarios'
-      enquete_id INTEGER NOT NULL,                                        -- Chave estrangeira para 'enquetes'
-      numero_pergunta INTEGER NOT NULL,                                   -- Número da pergunta
-      resposta INTEGER NOT NULL CHECK(resposta >= 0 AND resposta <= 10),  -- Resposta numérica de 0 a 10
-      criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,                      -- Coluna 'criado_em' com timestamp de criação
-      FOREIGN KEY (usuario_id) REFERENCES usuario(id) ON DELETE CASCADE,  -- Chave estrangeira para 'usuario'
-      FOREIGN KEY (enquete_id) REFERENCES enquetes(id) ON DELETE CASCADE  -- Chave estrangeira para 'enquetes'
-    );
-  ''')
-
-  conn.commit()
-  conn.close()
-
-init_db()
+@app.before_request
+def inicializa_banco():
+  db.inicializa_o_banco()
 
 @app.route('/')
 def index():
@@ -72,14 +35,8 @@ def login():
     email = request.form['email']
     senha = request.form['senha']
 
-    conn = sqlite3.connect('database.db')
-    cursor = conn.cursor()
-
-    cursor.execute('SELECT * FROM usuarios WHERE email = ? AND senha = ?', (email, senha))
-    usuario = cursor.fetchone()
-
-    conn.close()
-
+    usuario = db.autenticar_usuario(email, senha)
+    
     if usuario:
       return redirect(url_for('enquetes'))
     else:
@@ -89,40 +46,18 @@ def login():
 
 @app.route('/enquetes', methods=['GET', 'POST'])
 def enquetes():
-  conn = sqlite3.connect('database.db')
-  cursor = conn.cursor()
-
   if request.method == 'GET':
-    cursor.execute('SELECT * FROM enquetes')
-    enquetes = cursor.fetchall()
-
-    # mapeie enquetes para um objeto com os ids, títulos e perguntas
-    enquetes = [{'id': enquete[0],
-                'titulo': enquete[1],
-                'perguntas': enquete[2],
-                'criado_em': datetime.strptime(enquete[3], '%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y')}
-                for enquete in enquetes]
-
-    conn.close()
+    enquetes = db.recuperar_enquetes()
 
     return render_template('enquetes.html', enquetes=enquetes)
   elif request.method == 'POST':
-    try:
-      titulo = request.form['titulo']
-      perguntas = request.form.getlist('perguntas[]')
+    titulo = request.form['titulo']
+    perguntas = request.form.getlist('perguntas[]')
+    perguntas = ','.join(perguntas)
 
-      conn = sqlite3.connect('database.db')
-      cursor = conn.cursor()
-
-      cursor.execute('INSERT INTO enquetes (titulo, perguntas) VALUES (?, ?)', (titulo, ','.join(perguntas)))
-
-      conn.commit()
-      conn.close()
-
-      flash('Enquete criada com sucesso!', 'success')
+    if db.criar_enquete(titulo, perguntas):
       return redirect(url_for('enquetes'))
-    except Exception as e:
-      flash(f'Erro ao criar a enquete: {str(e)}', 'danger')
+    else:
       return redirect(url_for('nova_enquete'))
 
 @app.route('/nova_enquete', methods=['GET'])
