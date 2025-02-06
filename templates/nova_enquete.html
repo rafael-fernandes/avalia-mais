@@ -1,0 +1,42 @@
+{% extends "index.html" %}
+
+{% block pagetitle %}Nova Enquete{% endblock %}
+
+{% block content %}
+  <div class="container py-5">
+    <div class="d-flex w-100 justify-content-between align-items-center">
+      <h2><strong>Nova Enquete</strong></h2>
+    </div>
+
+    <div class="mt-4">
+      <form method="post">
+        <div class="row">
+          <div class="col-md-6">
+            <div class="form-group">
+              <label for="titulo">Nome da enquete</label>
+              <input type="text" class="form-control mt-2" id="titulo" name="titulo" required>
+            </div>
+          </div>
+        </div>
+        
+        <div class="pt-4">
+          <label>Selecione as perguntas que deseja incluir na enquete:</label>
+  
+          <div class="bg-light p-3 mt-3">
+            {% for key, pergunta in perguntas.items() %}
+              <div class="mb-1 form-check">
+                <input type="checkbox" class="form-check-input" id="pergunta-{{ key }}" value="{{ key }}" name="perguntas[]">
+                <label class="form-check-label" for="pergunta-{{ key }}">{{ pergunta }}</label>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="pt-4 d-flex justify-content-end">
+          <a href="{{ url_for('enquetes') }}" class="btn btn-secondary">Cancelar</a>&emsp;
+          <button type="submit" class="btn btn-success">Criar Enquete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

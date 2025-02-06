@@ -4,6 +4,20 @@ import sqlite3
 
 app = Flask(__name__)
 
+def get_perguntas():
+  return {
+    '1': 'O professor explicou o conteúdo de forma clara e compreensível?',
+    '2': 'O ritmo da aula foi adequado?',
+    '3': 'O material utilizado (slides, quadros, etc.) foi útil?',
+    '4': 'O professor demonstrou domínio do assunto?',
+    '5': 'A carga de trabalho da disciplina é adequada?',
+    '6': 'O conteúdo da aula foi relevante para o curso?',
+    '7': 'O professor utilizou exemplos práticos para ilustrar o conteúdo?',
+    '8': 'O ambiente de aula (físico ou virtual) foi adequado?',
+    '9': 'Você recomendaria este professor para outros alunos?',
+    '10': 'O professor foi receptivo a dúvidas e questionamentos?'
+  }
+
 # Configuração do banco de dados
 def init_db():
   conn = sqlite3.connect('database.db')
@@ -89,6 +103,12 @@ def enquetes():
   conn.close()
 
   return render_template('enquetes.html', enquetes=enquetes)
+
+@app.route('/nova_enquete', methods=['GET'])
+def nova_enquete():
+  perguntas = get_perguntas()
+
+  return render_template('nova_enquete.html', perguntas=perguntas)
 
 if __name__ == '__main__':
   app.run(debug=True)
