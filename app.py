@@ -1,8 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, flash
 from datetime import datetime
 import sqlite3
 
 app = Flask(__name__)
+
+app.secret_key = 'ppaH4u5LWhP2fVa3eM3ySLzfFiAdrMcs'
 
 def get_perguntas():
   return {
@@ -85,24 +87,43 @@ def login():
 
   return render_template('login.html')
 
-@app.route('/enquetes')
+@app.route('/enquetes', methods=['GET', 'POST'])
 def enquetes():
   conn = sqlite3.connect('database.db')
   cursor = conn.cursor()
 
-  cursor.execute('SELECT * FROM enquetes')
-  enquetes = cursor.fetchall()
+  if request.method == 'GET':
+    cursor.execute('SELECT * FROM enquetes')
+    enquetes = cursor.fetchall()
 
-  # mapeie enquetes para um objeto com os ids, títulos e perguntas
-  enquetes = [{'id': enquete[0],
-               'titulo': enquete[1],
-               'perguntas': enquete[2],
-               'criado_em': datetime.strptime(enquete[3], '%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y')}
-               for enquete in enquetes]
+    # mapeie enquetes para um objeto com os ids, títulos e perguntas
+    enquetes = [{'id': enquete[0],
+                'titulo': enquete[1],
+                'perguntas': enquete[2],
+                'criado_em': datetime.strptime(enquete[3], '%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y')}
+                for enquete in enquetes]
 
-  conn.close()
+    conn.close()
 
-  return render_template('enquetes.html', enquetes=enquetes)
+    return render_template('enquetes.html', enquetes=enquetes)
+  elif request.method == 'POST':
+    try:
+      titulo = request.form['titulo']
+      perguntas = request.form.getlist('perguntas')
+
+      conn = sqlite3.connect('database.db')
+      cursor = conn.cursor()
+
+      cursor.execute('INSERT INTO enquetes (titulo, perguntas) VALUES (?, ?)', (titulo, ','.join(perguntas)))
+
+      conn.commit()
+      conn.close()
+
+      flash('Enquete criada com sucesso!', 'success')
+      return redirect(url_for('enquetes'))
+    except Exception as e:
+      flash(f'Erro ao criar a enquete: {str(e)}', 'danger')
+      return redirect(url_for('nova_enquete'))
 
 @app.route('/nova_enquete', methods=['GET'])
 def nova_enquete():
