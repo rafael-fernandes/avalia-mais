@@ -6,9 +6,14 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
+      {% block title %}
+        <title>{% block pagetitle %}{% endblock %} | Avalia+</title>
+      {% endblock %}
+
       {% block styles %}
         <!-- Bootstrap CSS -->
         <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/bootstrap.min.css')}}">
+        <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/styles.css')}}">
       {% endblock %}
     {% endblock %}
   </head>
