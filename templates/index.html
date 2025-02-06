@@ -19,6 +19,19 @@
   </head>
 
   <body>
+    {% if current_user.is_authenticated %}
+      <nav class="navbar sticky-top bg-dark ">
+        <div class="container-fluid">
+          <a class="navbar-brand text-white" href="#">Avalia+</a>
+
+          <span class="navbar-text text-white">
+            Olá, {{ current_user.nome }}! &nbsp;
+            <a href="{{url_for('logout')}}" class="text-white">Sair</a>
+          </span>
+        </div>
+      </nav>
+    {% endif %}
+
     <!-- Your page content -->
     {% block content %}{% endblock %}
 

@@ -9,9 +9,21 @@
         <div class="text-center">
           <h1>Avalia+</h1>
         </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }} alert-dismissible fade show mt-4 mb-0">
+                {{ message }}
+
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
   
-        <div class="login-box mt-5">
-          <form method="post">
+        <div class="login-box mt-4">
+          <form method="post" action="{{ url_for('login') }}">
             <div class="form-group">
               <label for="email">Email</label>
               <input type="text" class="form-control mt-2" id="email" name="email" required>

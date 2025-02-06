@@ -1,6 +1,7 @@
 import sqlite3
 from flask import flash
 from datetime import datetime
+from models import User
 
 class Database:
   def __init__(self, db_name):
@@ -51,6 +52,21 @@ class Database:
       conn.close()
     except Exception as e:
       flash('Erro ao inicializar o banco de dados: ' + str(e))
+
+  def recuperar_usuario(self, id):
+    """Recupera um usuário pelo ID"""
+    conn = self._connect()
+    cursor = conn.cursor()
+
+    cursor.execute('SELECT id, email, nome FROM usuarios WHERE id = ?', (id,))
+    usuario = cursor.fetchone()
+
+    conn.close()
+
+    if usuario:
+      return User(usuario[0], usuario[1], usuario[2])
+    else:
+      return None
 
   def autenticar_usuario(self, email, senha):
     """Autentica um usuário no banco de dados"""
