@@ -109,7 +109,7 @@ def enquetes():
   elif request.method == 'POST':
     try:
       titulo = request.form['titulo']
-      perguntas = request.form.getlist('perguntas')
+      perguntas = request.form.getlist('perguntas[]')
 
       conn = sqlite3.connect('database.db')
       cursor = conn.cursor()
