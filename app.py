@@ -44,3 +44,31 @@ def init_db():
   conn.close()
 
 init_db()
+
+@app.route('/')
+def index():
+  return render_template('index.html')
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+  if request.method == 'POST':
+    email = request.form['email']
+    senha = request.form['senha']
+
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+
+    cursor.execute('SELECT * FROM usuarios WHERE email = ? AND senha = ?', (email, senha))
+    usuario = cursor.fetchone()
+
+    conn.close()
+
+    if usuario:
+      return redirect(url_for('enquetes'))
+    else:
+      return redirect(url_for('login'))
+
+  return render_template('login.html')
+
+if __name__ == '__main__':
+  app.run(debug=True)
