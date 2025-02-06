@@ -9,12 +9,12 @@
     </div>
 
     <div class="mt-4">
-      <form method="post">
+      <form id="form-enquete" method="post" onsubmit="return validarFormulario()">
         <div class="row">
           <div class="col-md-6">
             <div class="form-group">
               <label for="titulo">Nome da enquete</label>
-              <input type="text" class="form-control mt-2" id="titulo" name="titulo" required>
+              <input type="text" class="form-control mt-2" id="titulo" name="titulo">
             </div>
           </div>
         </div>
@@ -23,13 +23,25 @@
           <label>Selecione as perguntas que deseja incluir na enquete:</label>
   
           <div class="bg-light p-3 mt-3">
-            {% for key, pergunta in perguntas.items() %}
-              <div class="mb-1 form-check">
-                <input type="checkbox" class="form-check-input" id="pergunta-{{ key }}" value="{{ key }}" name="perguntas[]">
-                <label class="form-check-label" for="pergunta-{{ key }}">{{ pergunta }}</label>
-              </div>
-            {% endfor %}
+            <h6><strong class="text-primary"><span role="counting">0/10</span> PERGUNTAS SELECIONADAS</strong></h6>
+
+            <div class="pt-2">
+              {% for key, pergunta in perguntas.items() %}
+                <div class="mb-1 form-check">
+                  <input type="checkbox" class="form-check-input" id="pergunta-{{ key }}" value="{{ key }}" name="perguntas[]">
+                  <label class="form-check-label" for="pergunta-{{ key }}">{{ pergunta }}</label>
+                </div>
+              {% endfor %}
+            </div>
           </div>
+        </div>
+
+        <div class="alert alert-danger mt-4" id="erro-titulo" style="display: none;">
+          Preencha o nome da enquete.
+        </div>
+
+        <div class="alert alert-danger mt-4" id="erro-selecao" style="display: none;">
+          Selecione no mínimo 5 perguntas.
         </div>
 
         <div class="pt-4 d-flex justify-content-end">
@@ -39,4 +51,72 @@
       </div>
     </div>
   </div>
+
+  <script>
+    // Função para atualizar a contagem
+    function atualizarContagem() {
+      const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+      const countingSpan = document.querySelector('[role="counting"]');
+
+      // Contagem dos checkboxes selecionados
+      const selecionados = Array.from(checkboxes).filter(checkbox => checkbox.checked).length;
+      
+      // Atualizar o texto do span com a contagem
+      const total = checkboxes.length;
+      countingSpan.textContent = `${selecionados}/${total}`;
+
+      // Se o número de selecionados for 5 ou mais, esconde a mensagem de erro
+      if (selecionados >= 5) {
+        document.getElementById('erro-selecao').style.display = 'none';
+      }
+    }
+
+    // Função para validar o formulário
+    function validarFormulario() {
+      const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+      const selecionados = Array.from(checkboxes).filter(checkbox => checkbox.checked).length;
+      const titulo = document.getElementById('titulo').value.trim();  // Pega o valor do campo 'titulo'
+
+      // Divs de erro
+      const erroSelecaoDiv = document.getElementById('erro-selecao');
+      const erroTituloDiv = document.getElementById('erro-titulo');
+
+      // Verificar se o nome da enquete foi preenchido
+      if (titulo === '') {
+        erroTituloDiv.style.display = 'block';  // Mostra o erro de "Nome da enquete"
+        erroSelecaoDiv.style.display = 'none';  // Esconde o erro das perguntas
+        return false;  // Impede o envio do formulário
+      }
+
+      // Verificar se o número de perguntas selecionadas é menor que 5
+      if (selecionados < 5) {
+        erroSelecaoDiv.style.display = 'block';  // Mostra o erro de "Selecionar 5 perguntas"
+        erroTituloDiv.style.display = 'none';  // Esconde o erro do título
+        return false;  // Impede o envio do formulário
+      }
+
+      // Se tudo estiver correto, permite o envio do formulário
+      erroSelecaoDiv.style.display = 'none';  // Esconde o erro das perguntas
+      erroTituloDiv.style.display = 'none';  // Esconde o erro do título
+      return true;
+    }
+
+    // Adicionar evento de mudança para cada checkbox
+    document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+      checkbox.addEventListener('change', atualizarContagem);
+    });
+
+    // Adicionar evento de digitação no campo de texto para esconder o erro do título
+    document.getElementById('titulo').addEventListener('input', function() {
+      const erroTituloDiv = document.getElementById('erro-titulo');
+      const titulo = this.value.trim();
+      
+      if (titulo !== '') {
+        erroTituloDiv.style.display = 'none';  // Esconde o erro do nome da enquete
+      }
+    });
+
+    // Chamar a função ao carregar a página para atualizar a contagem inicial
+    atualizarContagem();
+  </script>
 {% endblock %}
