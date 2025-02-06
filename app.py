@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for
+from datetime import datetime
 import sqlite3
 
 app = Flask(__name__)
@@ -69,6 +70,25 @@ def login():
       return redirect(url_for('login'))
 
   return render_template('login.html')
+
+@app.route('/enquetes')
+def enquetes():
+  conn = sqlite3.connect('database.db')
+  cursor = conn.cursor()
+
+  cursor.execute('SELECT * FROM enquetes')
+  enquetes = cursor.fetchall()
+
+  # mapeie enquetes para um objeto com os ids, títulos e perguntas
+  enquetes = [{'id': enquete[0],
+               'titulo': enquete[1],
+               'perguntas': enquete[2],
+               'criado_em': datetime.strptime(enquete[3], '%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y')}
+               for enquete in enquetes]
+
+  conn.close()
+
+  return render_template('enquetes.html', enquetes=enquetes)
 
 if __name__ == '__main__':
   app.run(debug=True)

@@ -1,0 +1,29 @@
+{% extends "index.html" %}
+
+{% block pagetitle %}Minhas Enquetes{% endblock %}
+
+{% block content %}
+  <div class="container py-5">
+    <div class="d-flex w-100 justify-content-between align-items-center">
+      <h2><strong>Minhas Enquetes</strong></h2>
+
+      <a href="#" class="btn btn-success">+ Nova Enquete</a>
+    </div>
+
+    <div class="mt-4">
+      {% for enquete in enquetes %}
+        <div class="bg-light p-3 d-flex justify-content-between align-items-center mt-4">
+          <div>
+            <h5 class="mb-0"><strong>{{ enquete.titulo }}</strong></h5>
+
+            <div class="text-muted pt-1">
+              <small>Criado em {{ enquete.criado_em }}</small>
+            </div>
+          </div>
+
+          <a href="#" class="btn btn-secondary">Ver resultados</a>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+{% endblock %}
