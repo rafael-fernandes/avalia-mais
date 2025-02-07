@@ -40,10 +40,10 @@ def logout():
 
 # Rota para mostrar enquetes
 @login_required
-def enquetes():
+def professor_enquetes():
   if request.method == 'GET':
     enquetes = db.recuperar_enquetes()
-    return render_template('enquetes.html', enquetes=enquetes)
+    return render_template('professor/enquetes.html', enquetes=enquetes)
 
   elif request.method == 'POST':
     titulo = request.form['titulo']
@@ -52,14 +52,14 @@ def enquetes():
 
     if db.criar_enquete(titulo, perguntas):
       flash('Enquete criada com sucesso!', 'success')
-      return redirect(url_for('enquetes'))
+      return redirect(url_for('professor_enquetes'))
     else:
       flash('Erro ao criar enquete. Tente novamente.', 'error')
-      return redirect(url_for('nova_enquete'))
+      return redirect(url_for('professor_nova_enquete'))
 
 # Rota para nova enquete
 @login_required
-def nova_enquete():
+def professor_nova_enquete():
   perguntas = PerguntasService.get_perguntas()
   
-  return render_template('nova_enquete.html', perguntas=perguntas)
+  return render_template('professor/nova_enquete.html', perguntas=perguntas)

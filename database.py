@@ -118,8 +118,6 @@ class Database:
       conn.commit()
       conn.close()
 
-      flash('Enquete criada com sucesso!', 'success')
       return True
     except Exception as e:
-      flash('Erro ao criar enquete: ' + str(e), 'danger')
       return False
