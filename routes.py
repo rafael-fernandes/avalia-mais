@@ -26,13 +26,14 @@ def login():
       user = User(usuario[0], usuario[1], usuario[2])
       login_user(user)
 
-      return redirect(url_for('enquetes'))
+      return redirect(url_for('professor_enquetes'))
     else:
       flash('Credenciais inválidas', 'danger')  # Flash de erro
       return redirect(url_for('login'))
 
   return render_template('login.html')
 
+# Rota para logout
 @login_required
 def logout():
   logout_user()
