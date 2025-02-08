@@ -1,0 +1,81 @@
+{% extends "index.html" %}
+
+{% block pagetitle %}Resultados da Enquete{% endblock %}
+
+{% block content %}
+  <div class="container py-5">
+    {% include '_flashes.html' %}
+    
+    <div class="d-flex w-100 justify-content-between align-items-center">
+      <h2><strong>Resultados da Enquete</strong></h2>
+
+      <a href="{{ url_for('professor_enquetes') }}" class="btn btn-secondary">Voltar para as enquetes</a>
+    </div>
+
+    <div class="p-3 bg-light mt-3">
+      <div class="text-muted">
+        <small>Criado em {{ enquete.criado_em }}</small>
+      </div>
+
+      <h5 class="mt-2 mb-0"><strong>{{ enquete.titulo }}</strong></h5>
+    </div>
+
+    <div class="pt-4">
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>Pergunta</th>
+            <th>Média das respostas</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for key in perguntas.keys() %}
+            {% if key|string in enquete.perguntas %}
+              <tr>
+                <td>{{ perguntas[key] }}</td>
+                <td>{{ medias[key] if medias[key] is not none else 'Sem respostas' }}</td>
+              </tr>
+            {% endif %}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="pt-4">
+      <canvas id="grafico"></canvas>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const ctx = document.getElementById('grafico').getContext('2d');
+
+      // Dados das perguntas (textos) e médias das respostas
+      const labels = {{ perguntas_texto.values() | list | tojson }};  // Perguntas como texto
+      const data = {{ medias.values() | list | tojson }};        // Médias das respostas
+
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,  // Usando os textos das perguntas como labels
+          datasets: [{
+            label: 'Média das Respostas',
+            data: data,
+            backgroundColor: 'rgba(75, 192, 192, 0.5)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: { beginAtZero: true, max: 10 }
+          }
+        }
+      });
+    });
+  </script>
+{% endblock %}

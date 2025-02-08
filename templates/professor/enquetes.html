@@ -22,10 +22,18 @@
               <small>Criado em {{ enquete.criado_em }}</small>
             </div>
           </div>
-
-          <a href="#" class="btn btn-secondary">Ver resultados</a>
+          
+          <a href="{{ url_for('ver_resultados', enquete_id=enquete.id) }}" class="btn btn-secondary">Ver Resultados</a>
         </div>
       {% endfor %}
+
+      {% if enquetes|length == 0 %}
+        <div class="bg-light p-3 d-flex justify-content-between align-items-center mt-4">
+          <div>
+            <h5 class="mb-0"><strong class="text-muted">Nenhuma enquete criada</strong></h5>
+          </div>
+        </div>
+      {% endif %}
     </div>
   </div>
 {% endblock %}

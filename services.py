@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 class PerguntasService:
   @staticmethod
   def get_perguntas():
@@ -13,3 +15,19 @@ class PerguntasService:
       '9': 'Você recomendaria este professor para outros alunos?',
       '10': 'O professor foi receptivo a dúvidas e questionamentos?'
     }
+
+class EnqueteService:
+  def __init__(self, respostas):
+    """ Inicializa o serviço com uma lista de respostas no formato (numero_pergunta, resposta). """
+    self.respostas_dict = defaultdict(list)
+
+    for numero, resposta in respostas:
+      self.respostas_dict[numero].append(resposta)
+
+  def media_respostas(self, numero_pergunta):
+    """ Calcula a média das respostas para uma pergunta específica. """
+    if numero_pergunta in self.respostas_dict:
+      lista_respostas = self.respostas_dict[numero_pergunta]
+      return sum(lista_respostas) / len(lista_respostas)
+      
+    return None  # Retorna None se a pergunta não existir

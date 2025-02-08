@@ -70,6 +70,18 @@ class Database:
     except Exception as e:
       return False
 
+  def seed_usuarios(self):
+    usuarios = [
+      ("Rafael", "rafael@email.com", "aluno", "senha123"),
+      ("Hudson", "hudson@email.com", "aluno", "senha123"),
+      ("Edna", "edna@email.com", "professor", "senha123"),
+      ("UnB", "unb@email.com", "instituicao", "senha123")
+    ]
+
+    # Criar os usuários usando o método da classe Database
+    for nome, email, perfil, senha in usuarios:
+      self.criar_usuario(nome, email, perfil, senha)
+
   def recuperar_usuario(self, id):
     """Recupera um usuário pelo ID"""
     conn = self._connect()
@@ -169,7 +181,12 @@ class Database:
     conn.close()
 
     if enquete:
-      return {'id': enquete[0], 'titulo': enquete[1], 'perguntas': enquete[2].split(',')}
+      return {
+        'id': enquete[0],
+        'titulo': enquete[1],
+        'perguntas': enquete[2].split(','),
+        'criado_em': datetime.strptime(enquete[3], '%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y')
+      }
     else:
       return None
 
@@ -202,3 +219,15 @@ class Database:
       return True
     except Exception as e:
       return False
+  
+  def recuperar_respostas(self, enquete_id):
+    """Recupera as respostas de uma enquete"""
+    conn = self._connect()
+    cursor = conn.cursor()
+
+    cursor.execute('SELECT numero_pergunta, resposta FROM respostas WHERE enquete_id = ?', (enquete_id,))
+    respostas = cursor.fetchall()
+
+    conn.close()
+
+    return respostas

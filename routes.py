@@ -1,7 +1,7 @@
 from flask import render_template, request, redirect, url_for, flash
 from flask_login import login_user, login_required, current_user, logout_user
 from database import Database
-from services import PerguntasService
+from services import PerguntasService, EnqueteService
 from models import User
 
 db = Database('database.db')
@@ -39,6 +39,7 @@ def login():
 @login_required
 def logout():
   logout_user()
+  
   return redirect(url_for('login'))
 
 # Rota para mostrar enquetes
@@ -100,3 +101,26 @@ def responder_enquete(enquete_id):
     return redirect(url_for('aluno_enquetes'))
   elif request.method == 'GET':
     return render_template('aluno/responder_enquete.html', enquete=enquete, perguntas=perguntas)
+
+# Rota para ver resultados da enquete
+@login_required
+def ver_resultados(enquete_id):
+  enquete = db.recuperar_enquete(enquete_id)
+  enquete['perguntas'] = [pergunta.strip() for pergunta in enquete['perguntas'] if pergunta.strip()]
+  perguntas = PerguntasService.get_perguntas()
+
+  respostas = db.recuperar_respostas(enquete_id)
+
+  service = EnqueteService(respostas)
+
+  perguntas_validas = [pergunta.strip() for pergunta in enquete['perguntas'] if pergunta.strip()]
+
+  # Filtra as médias e perguntas de acordo com as perguntas válidas
+  medias = { key: service.media_respostas(int(key)) for key in perguntas.keys() if str(key) in perguntas_validas }
+  perguntas_texto = { key: perguntas[key] for key in perguntas.keys() if str(key) in perguntas_validas }
+
+  return render_template('professor/resultados.html', enquete=enquete,
+                                                      perguntas=perguntas,
+                                                      respostas=respostas,
+                                                      medias=medias,
+                                                      perguntas_texto=perguntas_texto)
