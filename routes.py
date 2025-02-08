@@ -9,12 +9,9 @@ db = Database('database.db')
 # Rota para a página inicial
 def index():
   if current_user.is_authenticated:
-    if current_user.perfil == 'professor':
-      return redirect(url_for('professor_enquetes'))
-    elif current_user.perfil == 'aluno':
-      return redirect(url_for('aluno_enquetes'))
-  
-  return render_template('login.html')
+    return redirect(url_for(f"{current_user.perfil}_enquetes"))
+  else:
+    return redirect(url_for('login'))
 
 # Rota para login
 def login():
@@ -30,8 +27,6 @@ def login():
     if usuario:
       user = User(usuario[0], usuario[1], usuario[2], usuario[3], usuario[4])
       login_user(user)
-
-      print(f"Usuário autenticado? {current_user.is_authenticated}")  # Debug
 
       return redirect(url_for(f"{user.perfil}_enquetes"))
     else:

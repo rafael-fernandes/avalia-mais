@@ -75,7 +75,7 @@ class Database:
     conn = self._connect()
     cursor = conn.cursor()
 
-    cursor.execute('SELECT id, email, nome, perfil, senha FROM usuarios WHERE id = ?', (id,))
+    cursor.execute('SELECT id, email, nome, senha, perfil FROM usuarios WHERE id = ?', (id,))
     usuario = cursor.fetchone()
 
     conn.close()
