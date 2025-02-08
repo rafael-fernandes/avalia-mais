@@ -30,7 +30,7 @@ def login():
 
       if user.perfil == 'professor':
         return redirect(url_for('professor_enquetes'))
-      else:
+      elif user.perfil == 'aluno':
         return redirect(url_for('aluno_enquetes'))
     else:
       flash('Credenciais inválidas', 'danger')  # Flash de erro
