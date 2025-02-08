@@ -9,14 +9,17 @@ db = Database('database.db')
 # Rota para a página inicial
 def index():
   if current_user.is_authenticated:
-    return redirect(url_for('professor_enquetes'))
+    if current_user.perfil == 'professor':
+      return redirect(url_for('professor_enquetes'))
+    elif current_user.perfil == 'aluno':
+      return redirect(url_for('aluno_enquetes'))
   
   return render_template('login.html')
 
 # Rota para login
 def login():
   if current_user.is_authenticated:
-    return redirect(url_for(current_user.perfil + '_enquetes'))
+    return redirect(url_for(f"{current_user.perfil}_enquetes"))
 
   if request.method == 'POST':
     email = request.form['email']
@@ -25,13 +28,12 @@ def login():
     usuario = db.autenticar_usuario(email, senha)
 
     if usuario:
-      user = User(usuario[0], usuario[1], usuario[2], usuario[3])
+      user = User(usuario[0], usuario[1], usuario[2], usuario[3], usuario[4])
       login_user(user)
 
-      if user.perfil == 'professor':
-        return redirect(url_for('professor_enquetes'))
-      elif user.perfil == 'aluno':
-        return redirect(url_for('aluno_enquetes'))
+      print(f"Usuário autenticado? {current_user.is_authenticated}")  # Debug
+
+      return redirect(url_for(f"{user.perfil}_enquetes"))
     else:
       flash('Credenciais inválidas', 'danger')  # Flash de erro
       return redirect(url_for('login'))
