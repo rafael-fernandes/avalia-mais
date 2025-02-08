@@ -8,8 +8,10 @@ db = Database('database.db')
 
 # Rota para a página inicial
 def index():
-  # get current_user name from flask_login
-  return render_template('index.html')
+  if current_user.is_authenticated:
+    return redirect(url_for('professor_enquetes'))
+  
+  return render_template('login.html')
 
 # Rota para login
 def login():
