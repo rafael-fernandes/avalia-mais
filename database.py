@@ -127,6 +127,52 @@ class Database:
       flash('Erro ao buscar enquetes: ' + str(e))
       return []
 
+  def recuperar_enquetes_disponiveis(self, usuario_id):
+    # selecione as enquetes que não possuem respostas para o usuario_id
+    try:
+      conn = self._connect()
+      cursor = conn.cursor()
+
+      cursor.execute('''
+        SELECT e.id, e.titulo, e.criado_em
+        FROM enquetes e
+        WHERE e.id NOT IN (
+          SELECT DISTINCT enquete_id
+          FROM respostas
+          WHERE usuario_id = ?
+        )
+      ''', (usuario_id,))
+
+      enquetes = cursor.fetchall()
+
+      # mapeie enquetes para um objeto com os ids, títulos e perguntas
+      enquetes = [{'id': enquete[0],
+                  'titulo': enquete[1],
+                  'criado_em': datetime.strptime(enquete[2], '%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y')}
+                  for enquete in enquetes]
+
+      conn.close()
+
+      return enquetes
+    except Exception as e:
+      flash('Erro ao buscar enquetes: ' + str(e))
+      return []
+
+  def recuperar_enquete(self, enquete_id):
+    """Recupera uma enquete pelo ID"""
+    conn = self._connect()
+    cursor = conn.cursor()
+
+    cursor.execute('SELECT * FROM enquetes WHERE id = ?', (enquete_id,))
+    enquete = cursor.fetchone()
+
+    conn.close()
+
+    if enquete:
+      return {'id': enquete[0], 'titulo': enquete[1], 'perguntas': enquete[2].split(',')}
+    else:
+      return None
+
   def criar_enquete(self, titulo, perguntas):
     """Cria uma nova enquete no banco de dados"""
     try:
@@ -134,6 +180,21 @@ class Database:
       cursor = conn.cursor()
 
       cursor.execute('INSERT INTO enquetes (titulo, perguntas, criado_em) VALUES (?, ?, ?)', (titulo, ','.join(perguntas), datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+
+      conn.commit()
+      conn.close()
+
+      return True
+    except Exception as e:
+      return False
+
+  def salvar_resposta(self, usuario_id, enquete_id, numero_pergunta, resposta):
+    """Salva uma resposta no banco de dados"""
+    try:
+      conn = self._connect()
+      cursor = conn.cursor()
+
+      cursor.execute('INSERT INTO respostas (usuario_id, enquete_id, numero_pergunta, resposta) VALUES (?, ?, ?, ?)', (usuario_id, enquete_id, numero_pergunta, resposta))
 
       conn.commit()
       conn.close()

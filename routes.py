@@ -28,7 +28,10 @@ def login():
       user = User(usuario[0], usuario[1], usuario[2], usuario[3])
       login_user(user)
 
-      return redirect(url_for(user.perfil + '_enquetes'))
+      if user.perfil == 'professor':
+        return redirect(url_for('professor_enquetes'))
+      else:
+        return redirect(url_for('aluno_enquetes'))
     else:
       flash('Credenciais inválidas', 'danger')  # Flash de erro
       return redirect(url_for('login'))
@@ -63,7 +66,8 @@ def professor_enquetes():
 # Rota para mostrar enquetes disponíveis
 @login_required
 def aluno_enquetes():
-  return render_template('aluno/enquetes.html')
+  enquetes = db.recuperar_enquetes_disponiveis(current_user.id)
+  return render_template('aluno/enquetes.html', enquetes=enquetes)
 
 # Rota para nova enquete
 @login_required
@@ -71,3 +75,31 @@ def professor_nova_enquete():
   perguntas = PerguntasService.get_perguntas()
   
   return render_template('professor/nova_enquete.html', perguntas=perguntas)
+
+# Rota para responder enquete
+@login_required
+def responder_enquete(enquete_id):
+  enquete = db.recuperar_enquete(enquete_id)
+  enquete['perguntas'] = [pergunta.strip() for pergunta in enquete['perguntas'] if pergunta.strip()]
+
+  perguntas = PerguntasService.get_perguntas()
+  
+  if request.method == 'POST':
+    respostas = request.form.to_dict()
+
+    respostas = [
+      {
+        "numero_pergunta": int(chave.split('[')[1].split(']')[0]),  # Extrai o número da pergunta
+        "resposta": int(valor)  # Converte a resposta para inteiro
+      }
+      for chave, valor in respostas.items()
+    ]
+
+    # itere sobre as respostas e salve no banco de dados
+    for resposta in respostas:
+      db.salvar_resposta(current_user.id, enquete_id, resposta['numero_pergunta'], resposta['resposta'])
+
+    flash('Enquete respondida com sucesso!', 'success')
+    return redirect(url_for('aluno_enquetes'))
+  elif request.method == 'GET':
+    return render_template('aluno/responder_enquete.html', enquete=enquete, perguntas=perguntas)
