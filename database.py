@@ -2,6 +2,7 @@ import sqlite3
 from flask import flash
 from datetime import datetime
 from models import User
+from werkzeug.security import generate_password_hash, check_password_hash
 
 class Database:
   def __init__(self, db_name):
@@ -32,6 +33,7 @@ class Database:
           nome TEXT NOT NULL,
           email TEXT NOT NULL UNIQUE,
           senha TEXT NOT NULL,
+          perfil TEXT DEFAULT 'aluno',
           criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
       ''')
@@ -52,6 +54,21 @@ class Database:
       conn.close()
     except Exception as e:
       flash('Erro ao inicializar o banco de dados: ' + str(e))
+
+  def criar_usuario(self, nome, email, perfil, senha):
+    """Cria um novo usuário no banco de dados"""
+    try:
+      conn = self._connect()
+      cursor = conn.cursor()
+
+      cursor.execute('INSERT INTO usuarios (nome, email, perfil, senha) VALUES (?, ?, ?, ?)', (nome, email, perfil, generate_password_hash(senha)))
+
+      conn.commit()
+      conn.close()
+
+      return True
+    except Exception as e:
+      return False
 
   def recuperar_usuario(self, id):
     """Recupera um usuário pelo ID"""
@@ -74,12 +91,15 @@ class Database:
       conn = self._connect()
       cursor = conn.cursor()
 
-      cursor.execute('SELECT * FROM usuarios WHERE email = ? AND senha = ?', (email, senha))
+      cursor.execute('SELECT * FROM usuarios WHERE email = ?', (email,))
       usuario = cursor.fetchone()
 
       conn.close()
 
-      return usuario
+      if usuario and check_password_hash(usuario[3], senha):
+        return usuario
+      else:
+        return None
     except Exception as e:
       flash('Erro ao autenticar usuário: ' + str(e))
       return None
