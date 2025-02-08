@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
-from routes import index, login, logout, professor_enquetes, professor_nova_enquete
+from routes import index, login, logout, professor_enquetes, professor_nova_enquete, aluno_enquetes
 from database import Database
 from auth import Auth
 from seed import seed_usuarios
@@ -24,6 +24,7 @@ app.add_url_rule('/login', 'login', login, methods=['GET', 'POST'])
 app.add_url_rule('/logout', 'logout', logout)
 app.add_url_rule('/professor/enquetes', 'professor_enquetes', professor_enquetes, methods=['GET', 'POST'])
 app.add_url_rule('/professor/nova_enquete', 'professor_nova_enquete', professor_nova_enquete)
+app.add_url_rule('/aluno/enquetes', 'aluno_enquetes', aluno_enquetes)
 
 if __name__ == '__main__':
   app.run(debug=True)

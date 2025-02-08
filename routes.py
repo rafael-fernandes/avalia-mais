@@ -16,7 +16,7 @@ def index():
 # Rota para login
 def login():
   if current_user.is_authenticated:
-    return redirect(url_for('enquetes'))
+    return redirect(url_for(current_user.perfil + '_enquetes'))
 
   if request.method == 'POST':
     email = request.form['email']
@@ -25,10 +25,10 @@ def login():
     usuario = db.autenticar_usuario(email, senha)
 
     if usuario:
-      user = User(usuario[0], usuario[1], usuario[2])
+      user = User(usuario[0], usuario[1], usuario[2], usuario[3])
       login_user(user)
 
-      return redirect(url_for('professor_enquetes'))
+      return redirect(url_for(user.perfil + '_enquetes'))
     else:
       flash('Credenciais inválidas', 'danger')  # Flash de erro
       return redirect(url_for('login'))
@@ -59,6 +59,11 @@ def professor_enquetes():
     else:
       flash('Erro ao criar enquete. Tente novamente.', 'error')
       return redirect(url_for('professor_nova_enquete'))
+
+# Rota para mostrar enquetes disponíveis
+@login_required
+def aluno_enquetes():
+  return render_template('aluno/enquetes.html')
 
 # Rota para nova enquete
 @login_required
