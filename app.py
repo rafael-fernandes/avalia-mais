@@ -1,8 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
-from routes import index, login, logout, professor_enquetes, professor_nova_enquete, aluno_enquetes, responder_enquete, ver_resultados
+from routes import index, login, cadastro, logout, professor_enquetes, professor_nova_enquete, aluno_enquetes, responder_enquete, ver_resultados
 from database import Database
 from auth import Auth
-from seed import seed_usuarios
 
 app = Flask(__name__)
 
@@ -19,6 +18,7 @@ db.seed_usuarios()
 # Define as rotas
 app.add_url_rule('/', 'index', index)
 app.add_url_rule('/login', 'login', login, methods=['GET', 'POST'])
+app.add_url_rule('/cadastro', 'cadastro', cadastro, methods=['GET', 'POST'])
 app.add_url_rule('/logout', 'logout', logout)
 app.add_url_rule('/professor/enquetes', 'professor_enquetes', professor_enquetes, methods=['GET', 'POST'])
 app.add_url_rule('/professor/nova_enquete', 'professor_nova_enquete', professor_nova_enquete)

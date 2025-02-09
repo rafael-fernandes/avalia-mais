@@ -35,6 +35,27 @@ def login():
 
   return render_template('login.html')
 
+# Rota para cadastro
+def cadastro():
+  if request.method == 'POST':
+    nome = request.form['nome']
+    email = request.form['email']
+    senha = request.form['senha']
+    perfil = request.form['perfil']
+
+    if db.criar_usuario(nome, email, perfil, senha):
+      usuario = db.autenticar_usuario(email, senha)
+      user = User(usuario[0], usuario[1], usuario[2], usuario[3], usuario[4])
+      login_user(user)
+
+      flash('Cadastro realizado com sucesso!', 'success')
+      return redirect(url_for('index'))
+    else:
+      flash('Erro ao cadastrar. Tente novamente.', 'danger')
+      return redirect(url_for('cadastro'))
+
+  return render_template('cadastro.html')
+
 # Rota para logout
 @login_required
 def logout():
