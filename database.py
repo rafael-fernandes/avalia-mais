@@ -99,6 +99,18 @@ class Database:
     else:
       return None
 
+  def recuperar_professores(self):
+    """Recupera todos os professores do banco de dados"""
+    conn = self._connect()
+    cursor = conn.cursor()
+
+    cursor.execute('SELECT id, email, nome FROM usuarios WHERE perfil = "professor"')
+    professores = cursor.fetchall()
+
+    conn.close()
+
+    return professores
+
   def autenticar_usuario(self, email, senha):
     """Autentica um usuário no banco de dados"""
     try:
@@ -118,13 +130,17 @@ class Database:
       flash('Erro ao autenticar usuário: ' + str(e))
       return None
 
-  def recuperar_enquetes(self):
+  def recuperar_enquetes(self, usuario_id=None):
     """Retorna todas as enquetes do banco de dados"""
     try:
       conn = self._connect()
       cursor = conn.cursor()
 
-      cursor.execute('SELECT * FROM enquetes')
+      if usuario_id:
+        cursor.execute('SELECT * FROM enquetes WHERE usuario_id = ?', (usuario_id,))
+      else:
+        cursor.execute('SELECT * FROM enquetes')
+
       enquetes = cursor.fetchall()
 
       # mapeie enquetes para um objeto com os ids, títulos e perguntas

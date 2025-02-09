@@ -72,7 +72,7 @@ def professor_enquetes():
     return redirect(url_for('index'))
 
   if request.method == 'GET':
-    enquetes = db.recuperar_enquetes()
+    enquetes = db.recuperar_enquetes(current_user.id)
     return render_template('professor/enquetes.html', enquetes=enquetes)
 
   elif request.method == 'POST':
@@ -142,7 +142,7 @@ def responder_enquete(enquete_id):
 
 # Rota para ver resultados da enquete
 @login_required
-def ver_resultados(enquete_id):
+def professor_ver_resultados(enquete_id):
   # Autorização
   if current_user.perfil != 'professor':
     return redirect(url_for('index'))
@@ -166,3 +166,57 @@ def ver_resultados(enquete_id):
                                                       respostas=respostas,
                                                       medias=medias,
                                                       perguntas_texto=perguntas_texto)
+
+# Rota para ver todas as enquetes
+@login_required
+def instituicao_enquetes():
+  # Autorização
+  if current_user.perfil != 'instituicao':
+    return redirect(url_for('index'))
+  
+  enquetes = db.recuperar_enquetes()
+
+  for enquete in enquetes:
+    user = db.recuperar_usuario(enquete['usuario_id'])
+    enquete['professor'] = user
+
+  professores = db.recuperar_professores()
+
+  # pluck 0 and 2 for each in professores
+  professores = [ (professor[0], professor[2]) for professor in professores ]
+
+  usuario_id = request.args.get('usuario_id')
+
+  if usuario_id:
+    enquetes = [ enquete for enquete in enquetes if enquete['usuario_id'] == int(usuario_id) ]
+
+  return render_template('instituicao/enquetes.html', enquetes=enquetes, professores=professores, usuario_id=usuario_id)
+
+# Rota para ver resultados da enquete
+@login_required
+def instituicao_ver_resultados(enquete_id):
+  # Autorização
+  if current_user.perfil != 'instituicao':
+    return redirect(url_for('index'))
+  
+  enquete = db.recuperar_enquete(enquete_id)
+  enquete['perguntas'] = [pergunta.strip() for pergunta in enquete['perguntas'] if pergunta.strip()]
+  enquete['professor'] = db.recuperar_usuario(enquete['usuario_id'])
+  
+  perguntas = PerguntasService.get_perguntas()
+
+  respostas = db.recuperar_respostas(enquete_id)
+
+  service = EnqueteService(respostas)
+
+  perguntas_validas = [pergunta.strip() for pergunta in enquete['perguntas'] if pergunta.strip()]
+
+  # Filtra as médias e perguntas de acordo com as perguntas válidas
+  medias = { key: service.media_respostas(int(key)) for key in perguntas.keys() if str(key) in perguntas_validas }
+  perguntas_texto = { key: perguntas[key] for key in perguntas.keys() if str(key) in perguntas_validas }
+
+  return render_template('instituicao/resultados.html', enquete=enquete,
+                                                        perguntas=perguntas,
+                                                        respostas=respostas,
+                                                        medias=medias,
+                                                        perguntas_texto=perguntas_texto)  

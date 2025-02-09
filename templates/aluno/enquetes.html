@@ -26,9 +26,13 @@
       {% endfor %}
 
       {% if enquetes|length == 0 %}
-        <div class="bg-light p-3 d-flex justify-content-between align-items-center mt-4">
-          <div>
-            <h5 class="mb-0"><strong class="text-muted">Nenhuma enquete disponível</strong></h5>
+        <div class="empty-state">
+          <img src="{{ url_for('static', filename='images/searching-data.svg') }}" alt="Sem enquetes">
+
+          <h4><strong>Não há enquetes disponiveis</strong></h4>
+
+          <div class="text-muted">
+            Aguarde até que um professor disponibilize uma nova enquete.
           </div>
         </div>
       {% endif %}

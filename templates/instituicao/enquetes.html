@@ -1,0 +1,65 @@
+{% extends "index.html" %}
+
+{% block pagetitle %}Todas as Enquetes{% endblock %}
+
+{% block content %}
+  <div class="container py-5">
+    {% include '_flashes.html' %}
+  
+    <div class="d-flex w-100 justify-content-between align-items-center">
+      <h2><strong>Todas as Enquetes</strong></h2>
+    </div>
+
+    <div class="mt-4">
+      <form method="GET" action="{{ url_for('instituicao_enquetes') }}">
+        <label for="usuario_id">Filtre por professor</label>
+
+        <div class="row pt-3">
+          <div class="col-md-3">
+            <select class="form-select" id="usuario_id" name="usuario_id">
+              <option value="">Todos</option>
+              
+              {% for professor in professores %}
+                <option value="{{ professor[0] }}" {% if professor[0]|string == usuario_id|string %}selected{% endif %}>{{ professor[1] }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-2">
+            <div class="d-grid">
+              <button type="submit" class="btn btn-secondary">Filtrar</button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+    
+    <div class="mt-5">
+      {% for enquete in enquetes %}
+        <div class="bg-light p-3 d-flex justify-content-between align-items-center mt-4">
+          <div>
+            <h5 class="mb-0"><strong>{{ enquete.titulo }}</strong></h5>
+
+            <div class="text-muted pt-1">
+              <small>Criado em {{ enquete.criado_em }}</small> por <strong>{{ enquete.professor.nome }}</strong>
+            </div>
+          </div>
+
+          <a href="{{ url_for('instituicao_ver_resultados', enquete_id=enquete.id) }}" class="btn btn-success">Ver resultados</a>
+        </div>
+      {% endfor %}
+
+      {% if enquetes|length == 0 %}
+        <div class="empty-state">
+          <img src="{{ url_for('static', filename='images/empty-box.svg') }}" alt="Sem enquetes">
+
+          <h4><strong>Não há enquetes criadas</strong></h4>
+
+          <div class="text-muted">
+            Os professores da sua instituição ainda não criaram enquetes.
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
