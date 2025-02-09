@@ -71,19 +71,7 @@ class Database:
       return True
     except Exception as e:
       return False
-
-  def seed_usuarios(self):
-    usuarios = [
-      ("Rafael", "rafael@email.com", "aluno", "senha123"),
-      ("Hudson", "hudson@email.com", "aluno", "senha123"),
-      ("Edna", "edna@email.com", "professor", "senha123"),
-      ("UnB", "unb@email.com", "instituicao", "senha123")
-    ]
-
-    # Criar os usuários usando o método da classe Database
-    for nome, email, perfil, senha in usuarios:
-      self.criar_usuario(nome, email, perfil, senha)
-
+    
   def recuperar_usuario(self, id):
     """Recupera um usuário pelo ID"""
     conn = self._connect()

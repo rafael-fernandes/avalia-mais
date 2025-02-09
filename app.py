@@ -13,7 +13,6 @@ db = Database('database.db')
 
 # Inicializa o banco de dados
 db.inicializa_o_banco()
-db.seed_usuarios()
 
 # Define as rotas
 app.add_url_rule('/', 'index', index)
