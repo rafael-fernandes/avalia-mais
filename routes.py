@@ -60,7 +60,8 @@ def cadastro():
 @login_required
 def logout():
   logout_user()
-  
+
+  flash('Até a próxima!', 'success')
   return redirect(url_for('login'))
 
 # Rota para mostrar enquetes
