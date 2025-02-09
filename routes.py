@@ -45,6 +45,10 @@ def logout():
 # Rota para mostrar enquetes
 @login_required
 def professor_enquetes():
+  # Autorização
+  if current_user.perfil != 'professor':
+    return redirect(url_for('index'))
+
   if request.method == 'GET':
     enquetes = db.recuperar_enquetes()
     return render_template('professor/enquetes.html', enquetes=enquetes)
@@ -64,12 +68,20 @@ def professor_enquetes():
 # Rota para mostrar enquetes disponíveis
 @login_required
 def aluno_enquetes():
+  # Autorização
+  if current_user.perfil != 'aluno':
+    return redirect(url_for('index'))
+
   enquetes = db.recuperar_enquetes_disponiveis(current_user.id)
   return render_template('aluno/enquetes.html', enquetes=enquetes)
 
 # Rota para nova enquete
 @login_required
 def professor_nova_enquete():
+  # Autorização
+  if current_user.perfil != 'professor':
+    return redirect(url_for('index'))
+
   perguntas = PerguntasService.get_perguntas()
   
   return render_template('professor/nova_enquete.html', perguntas=perguntas)
@@ -77,6 +89,10 @@ def professor_nova_enquete():
 # Rota para responder enquete
 @login_required
 def responder_enquete(enquete_id):
+  # Autorização
+  if current_user.perfil != 'aluno':
+    return redirect(url_for('index'))
+
   enquete = db.recuperar_enquete(enquete_id)
   enquete['perguntas'] = [pergunta.strip() for pergunta in enquete['perguntas'] if pergunta.strip()]
 
@@ -105,6 +121,10 @@ def responder_enquete(enquete_id):
 # Rota para ver resultados da enquete
 @login_required
 def ver_resultados(enquete_id):
+  # Autorização
+  if current_user.perfil != 'professor':
+    return redirect(url_for('index'))
+
   enquete = db.recuperar_enquete(enquete_id)
   enquete['perguntas'] = [pergunta.strip() for pergunta in enquete['perguntas'] if pergunta.strip()]
   perguntas = PerguntasService.get_perguntas()
