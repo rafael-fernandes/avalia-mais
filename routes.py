@@ -80,11 +80,11 @@ def professor_enquetes():
     perguntas = request.form.getlist('perguntas[]')
     perguntas = ','.join(perguntas)
 
-    if db.criar_enquete(titulo, perguntas):
+    if db.criar_enquete(titulo, perguntas, current_user.id):
       flash('Enquete criada com sucesso!', 'success')
       return redirect(url_for('professor_enquetes'))
     else:
-      flash('Erro ao criar enquete. Tente novamente.', 'error')
+      flash('Erro ao criar enquete. Tente novamente.', 'danger')
       return redirect(url_for('professor_nova_enquete'))
 
 # Rota para mostrar enquetes disponíveis

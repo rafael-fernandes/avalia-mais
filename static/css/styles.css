@@ -13,3 +13,18 @@ body, html {
 label {
   font-weight: 500;
 }
+
+.empty-state {
+  border: 2px dashed #bdc3c7;
+  border-radius: 1rem;
+  padding: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.empty-state img {
+  width: 400px;
+  height: auto;
+}

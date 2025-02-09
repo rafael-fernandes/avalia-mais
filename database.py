@@ -23,7 +23,9 @@ class Database:
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           titulo TEXT NOT NULL,
           perguntas TEXT,
-          criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          usuario_id INTEGER NOT NULL,
+          criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
         );
       ''')
 
@@ -190,13 +192,13 @@ class Database:
     else:
       return None
 
-  def criar_enquete(self, titulo, perguntas):
+  def criar_enquete(self, titulo, perguntas, usuario_id):
     """Cria uma nova enquete no banco de dados"""
     try:
       conn = self._connect()
       cursor = conn.cursor()
 
-      cursor.execute('INSERT INTO enquetes (titulo, perguntas, criado_em) VALUES (?, ?, ?)', (titulo, ','.join(perguntas), datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+      cursor.execute('INSERT INTO enquetes (titulo, perguntas, usuario_id) VALUES (?, ?, ?)', (titulo, ','.join(perguntas), usuario_id))
 
       conn.commit()
       conn.close()
