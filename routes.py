@@ -95,7 +95,9 @@ def aluno_enquetes():
     return redirect(url_for('index'))
 
   enquetes = db.recuperar_enquetes_disponiveis(current_user.id)
-  return render_template('aluno/enquetes.html', enquetes=enquetes)
+  enquetes_respondidas = db.recuperar_enquetes_respondidas(current_user.id)
+
+  return render_template('aluno/enquetes.html', enquetes=enquetes, enquetes_respondidas=enquetes_respondidas)
 
 # Rota para nova enquete
 @login_required
@@ -117,6 +119,7 @@ def responder_enquete(enquete_id):
 
   enquete = db.recuperar_enquete(enquete_id)
   enquete['perguntas'] = [pergunta.strip() for pergunta in enquete['perguntas'] if pergunta.strip()]
+  enquete['professor'] = db.recuperar_usuario(enquete['usuario_id'])
 
   perguntas = PerguntasService.get_perguntas()
   
@@ -220,3 +223,21 @@ def instituicao_ver_resultados(enquete_id):
                                                         respostas=respostas,
                                                         medias=medias,
                                                         perguntas_texto=perguntas_texto)  
+
+# Rota para ver respostas da enquete
+@login_required
+def aluno_ver_respostas(enquete_id):
+  # Autorização
+  if current_user.perfil != 'aluno':
+    return redirect(url_for('index'))
+
+  enquete = db.recuperar_enquete(enquete_id)
+  enquete['perguntas'] = [pergunta.strip() for pergunta in enquete['perguntas'] if pergunta.strip()]
+  enquete['professor'] = db.recuperar_usuario(enquete['usuario_id'])
+
+  perguntas = PerguntasService.get_perguntas()
+
+  respostas = db.recuperar_respostas(enquete_id, current_user.id)
+  respostas = { resposta[0]: resposta[1] for resposta in respostas }
+  
+  return render_template('aluno/ver_respostas.html', enquete=enquete, perguntas=perguntas, respostas=respostas)

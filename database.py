@@ -189,6 +189,36 @@ class Database:
       flash('Erro ao buscar enquetes: ' + str(e))
       return []
 
+  def recuperar_enquetes_respondidas(self, usuario_id):
+    # selecione as enquetes que possuem respostas para o usuario_id
+    try:
+      conn = self._connect()
+      cursor = conn.cursor()
+
+      cursor.execute('''
+        SELECT e.id, e.titulo, e.criado_em
+        FROM enquetes e
+        WHERE e.id IN (
+          SELECT DISTINCT enquete_id
+          FROM respostas
+          WHERE usuario_id = ?
+        )
+      ''', (usuario_id,))
+
+      enquetes = cursor.fetchall()
+
+      # mapeie enquetes para um objeto com os ids, títulos e perguntas
+      enquetes = [{'id': enquete[0],
+                  'titulo': enquete[1],
+                  'criado_em': datetime.strptime(enquete[2], '%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y')}
+                  for enquete in enquetes]
+
+      conn.close()
+
+      return enquetes
+    except Exception as e:
+      flash('Erro ao buscar enquetes: ' + str(e))
+
   def recuperar_enquete(self, enquete_id):
     """Recupera uma enquete pelo ID"""
     conn = self._connect()
@@ -240,12 +270,16 @@ class Database:
     except Exception as e:
       return False
   
-  def recuperar_respostas(self, enquete_id):
+  def recuperar_respostas(self, enquete_id, usuario_id=None):
     """Recupera as respostas de uma enquete"""
     conn = self._connect()
     cursor = conn.cursor()
 
-    cursor.execute('SELECT numero_pergunta, resposta FROM respostas WHERE enquete_id = ?', (enquete_id,))
+    if usuario_id:
+      cursor.execute('SELECT numero_pergunta, resposta FROM respostas WHERE enquete_id = ? AND usuario_id = ?', (enquete_id, usuario_id))
+    else:
+      cursor.execute('SELECT numero_pergunta, resposta FROM respostas WHERE enquete_id = ?', (enquete_id,))
+
     respostas = cursor.fetchall()
 
     conn.close()

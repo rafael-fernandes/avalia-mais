@@ -1,0 +1,35 @@
+{% extends "index.html" %}
+
+{% block pagetitle %}Respostas da Enquete{% endblock %}
+
+{% block content %}
+  <div class="container py-5">
+    {% include '_flashes.html' %}
+  
+    <div class="d-flex w-100 justify-content-between align-items-center">
+      <h2><strong>Respostas da Enquete</strong></h2>
+
+      <a href="{{ url_for('aluno_enquetes') }}" class="btn btn-secondary">Voltar para enquetes</a>
+    </div>
+
+    <div class="pt-4">
+      <div class="p-3 bg-dark text-white mt-3">
+        <small>Criado em {{ enquete.criado_em }} por {{ enquete.professor.nome }}</small>
+  
+        <h5 class="mt-2 mb-0"><strong>{{ enquete.titulo }}</strong></h5>
+      </div>
+      
+      {% for key in perguntas.keys() %}
+        {% if key|string in enquete.perguntas %}
+          <div class="p-3 bg-light mt-4 rounded pergunta">
+            <strong>{{ perguntas[key] }}</strong>
+
+            <div class="pt-3 text-muted">
+              Você deu <strong>nota {{ respostas[key|int] }}</strong> para esta pergunta.
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+{% endblock %}
