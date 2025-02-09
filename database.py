@@ -131,7 +131,8 @@ class Database:
       enquetes = [{'id': enquete[0],
                   'titulo': enquete[1],
                   'perguntas': enquete[2],
-                  'criado_em': datetime.strptime(enquete[3], '%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y')}
+                  'usuario_id': enquete[3],
+                  'criado_em': datetime.strptime(enquete[4], '%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y')}
                   for enquete in enquetes]
 
       conn.close()
@@ -187,7 +188,8 @@ class Database:
         'id': enquete[0],
         'titulo': enquete[1],
         'perguntas': enquete[2].split(','),
-        'criado_em': datetime.strptime(enquete[3], '%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y')
+        'usuario_id': enquete[3],
+        'criado_em': datetime.strptime(enquete[4], '%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y')
       }
     else:
       return None
@@ -198,7 +200,7 @@ class Database:
       conn = self._connect()
       cursor = conn.cursor()
 
-      cursor.execute('INSERT INTO enquetes (titulo, perguntas, usuario_id) VALUES (?, ?, ?)', (titulo, ','.join(perguntas), usuario_id))
+      cursor.execute('INSERT INTO enquetes (titulo, perguntas, usuario_id, criado_em) VALUES (?, ?, ?, ?)', (titulo, ','.join(perguntas), usuario_id, datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
 
       conn.commit()
       conn.close()
