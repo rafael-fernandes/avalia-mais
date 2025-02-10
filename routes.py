@@ -73,8 +73,22 @@ def professor_enquetes():
     return redirect(url_for('index'))
 
   if request.method == 'GET':
+    page = request.args.get('page', 1, type=int)
+    per_page = 5
+
+    start = (page - 1) * per_page
+    end = start + per_page
+
     enquetes = db.recuperar_enquetes(current_user.id)
-    return render_template('professor/enquetes.html', enquetes=enquetes)
+
+    total_paginas = len(enquetes) // per_page
+    ultima_pagina = len(enquetes) % per_page
+
+    enquetes = enquetes[start:end]
+
+    has_next = page < total_paginas or len(enquetes) == per_page and ultima_pagina != 0
+
+    return render_template('professor/enquetes.html', enquetes=enquetes, page=page, has_next=has_next)
 
   elif request.method == 'POST':
     titulo = request.form['titulo']
