@@ -41,7 +41,7 @@
             <h5 class="mb-0"><strong>{{ enquete.titulo }}</strong></h5>
 
             <div class="text-muted pt-1">
-              <small>Criado em {{ enquete.criado_em }}</small> por <strong>{{ enquete.professor.nome }}</strong>
+              <small>Criado em {{ enquete.criado_em }}</small> por {{ enquete.professor.nome }} &middot; Prazo para respostas: {{ enquete.prazo }}
             </div>
           </div>
 

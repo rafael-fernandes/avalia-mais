@@ -13,10 +13,17 @@
     <div class="mt-4">
       <form action="/professor/enquetes" id="form-enquete" method="post" onsubmit="return validarFormulario()">
         <div class="row">
-          <div class="col-md-6">
+          <div class="col-md-4">
             <div class="form-group">
               <label for="titulo">Nome da enquete</label>
               <input type="text" class="form-control mt-2" id="titulo" name="titulo">
+            </div>
+          </div>
+
+          <div class="col-md-2">
+            <div class="form-group">
+              <label for="prazo">Prazo para responder</label>
+              <input type="date" class="form-control mt-2" id="prazo" name="prazo">
             </div>
           </div>
         </div>
@@ -42,6 +49,10 @@
           Preencha o nome da enquete.
         </div>
 
+        <div class="alert alert-danger mt-4" id="erro-prazo" style="display: none;">
+          Defina um prazo válido (a partir de hoje).
+        </div>
+
         <div class="alert alert-danger mt-4" id="erro-selecao" style="display: none;">
           Selecione no mínimo 5 perguntas.
         </div>
@@ -55,70 +66,79 @@
   </div>
 
   <script>
-    // Função para atualizar a contagem
     function atualizarContagem() {
       const checkboxes = document.querySelectorAll('input[type="checkbox"]');
       const countingSpan = document.querySelector('[role="counting"]');
-
-      // Contagem dos checkboxes selecionados
+  
       const selecionados = Array.from(checkboxes).filter(checkbox => checkbox.checked).length;
-      
-      // Atualizar o texto do span com a contagem
       const total = checkboxes.length;
       countingSpan.textContent = `${selecionados}/${total}`;
-
-      // Se o número de selecionados for 5 ou mais, esconde a mensagem de erro
+  
       if (selecionados >= 5) {
         document.getElementById('erro-selecao').style.display = 'none';
       }
     }
-
-    // Função para validar o formulário
+  
     function validarFormulario() {
       const checkboxes = document.querySelectorAll('input[type="checkbox"]');
       const selecionados = Array.from(checkboxes).filter(checkbox => checkbox.checked).length;
-      const titulo = document.getElementById('titulo').value.trim();  // Pega o valor do campo 'titulo'
-
+      const titulo = document.getElementById('titulo').value.trim();
+      const prazo = document.getElementById('prazo').value; // Captura o valor do prazo
+      const hoje = new Date().toISOString().split('T')[0]; // Obtém a data de hoje no formato YYYY-MM-DD
+  
       // Divs de erro
       const erroSelecaoDiv = document.getElementById('erro-selecao');
       const erroTituloDiv = document.getElementById('erro-titulo');
-
-      // Verificar se o nome da enquete foi preenchido
+      const erroPrazoDiv = document.getElementById('erro-prazo');
+  
+      // Verifica se o título foi preenchido
       if (titulo === '') {
-        erroTituloDiv.style.display = 'block';  // Mostra o erro de "Nome da enquete"
-        erroSelecaoDiv.style.display = 'none';  // Esconde o erro das perguntas
-        return false;  // Impede o envio do formulário
+        erroTituloDiv.style.display = 'block';
+        erroSelecaoDiv.style.display = 'none';
+        erroPrazoDiv.style.display = 'none';
+        return false;
       }
-
-      // Verificar se o número de perguntas selecionadas é menor que 5
+  
+      // Verifica se pelo menos 5 perguntas foram selecionadas
       if (selecionados < 5) {
-        erroSelecaoDiv.style.display = 'block';  // Mostra o erro de "Selecionar 5 perguntas"
-        erroTituloDiv.style.display = 'none';  // Esconde o erro do título
-        return false;  // Impede o envio do formulário
+        erroSelecaoDiv.style.display = 'block';
+        erroTituloDiv.style.display = 'none';
+        erroPrazoDiv.style.display = 'none';
+        return false;
       }
-
+  
+      // Valida o prazo (não pode estar vazio e deve ser maior ou igual a hoje)
+      if (!prazo || prazo < hoje) {
+        erroPrazoDiv.style.display = 'block';
+        erroTituloDiv.style.display = 'none';
+        erroSelecaoDiv.style.display = 'none';
+        return false;
+      }
+  
       // Se tudo estiver correto, permite o envio do formulário
-      erroSelecaoDiv.style.display = 'none';  // Esconde o erro das perguntas
-      erroTituloDiv.style.display = 'none';  // Esconde o erro do título
+      erroSelecaoDiv.style.display = 'none';
+      erroTituloDiv.style.display = 'none';
+      erroPrazoDiv.style.display = 'none';
       return true;
     }
-
-    // Adicionar evento de mudança para cada checkbox
+  
     document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
       checkbox.addEventListener('change', atualizarContagem);
     });
-
-    // Adicionar evento de digitação no campo de texto para esconder o erro do título
-    document.getElementById('titulo').addEventListener('input', function() {
-      const erroTituloDiv = document.getElementById('erro-titulo');
-      const titulo = this.value.trim();
-      
-      if (titulo !== '') {
-        erroTituloDiv.style.display = 'none';  // Esconde o erro do nome da enquete
+  
+    document.getElementById('titulo').addEventListener('input', function () {
+      if (this.value.trim() !== '') {
+        document.getElementById('erro-titulo').style.display = 'none';
       }
     });
-
-    // Chamar a função ao carregar a página para atualizar a contagem inicial
+  
+    document.getElementById('prazo').addEventListener('change', function () {
+      const hoje = new Date().toISOString().split('T')[0];
+      if (this.value >= hoje) {
+        document.getElementById('erro-prazo').style.display = 'none';
+      }
+    });
+  
     atualizarContagem();
   </script>
 {% endblock %}

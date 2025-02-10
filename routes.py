@@ -3,6 +3,7 @@ from flask_login import login_user, login_required, current_user, logout_user
 from database import Database
 from services import PerguntasService, EnqueteService
 from models import User
+from datetime import datetime, timedelta
 
 db = Database('database.db')
 
@@ -79,8 +80,9 @@ def professor_enquetes():
     titulo = request.form['titulo']
     perguntas = request.form.getlist('perguntas[]')
     perguntas = ','.join(perguntas)
+    prazo = request.form['prazo']
 
-    if db.criar_enquete(titulo, perguntas, current_user.id):
+    if db.criar_enquete(titulo, perguntas, current_user.id, prazo):
       flash('Enquete criada com sucesso!', 'success')
       return redirect(url_for('professor_enquetes'))
     else:
@@ -95,6 +97,10 @@ def aluno_enquetes():
     return redirect(url_for('index'))
 
   enquetes = db.recuperar_enquetes_disponiveis(current_user.id)
+
+  for enquete in enquetes:
+    enquete['prazo_expirado'] = datetime.strptime(enquete['prazo'], '%d/%m/%Y').date() < datetime.now().date()
+
   enquetes_respondidas = db.recuperar_enquetes_respondidas(current_user.id)
 
   return render_template('aluno/enquetes.html', enquetes=enquetes, enquetes_respondidas=enquetes_respondidas)
@@ -120,6 +126,11 @@ def responder_enquete(enquete_id):
   enquete = db.recuperar_enquete(enquete_id)
   enquete['perguntas'] = [pergunta.strip() for pergunta in enquete['perguntas'] if pergunta.strip()]
   enquete['professor'] = db.recuperar_usuario(enquete['usuario_id'])
+
+  # Checa se a enquete já está expirada
+  if datetime.strptime(enquete['prazo'], '%d/%m/%Y').date() < datetime.now().date():
+    flash('Esta enquete já expirou!', 'danger')
+    return redirect(url_for('aluno_enquetes'))
 
   perguntas = PerguntasService.get_perguntas()
   

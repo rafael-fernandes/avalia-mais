@@ -17,11 +17,15 @@
             <h5 class="mb-0"><strong>{{ enquete.titulo }}</strong></h5>
 
             <div class="text-muted pt-1">
-              <small>Criado em {{ enquete.criado_em }}</small>
+              <small>Criado em {{ enquete.criado_em }} &middot; Prazo para responder: {{ enquete.prazo }}</small>
             </div>
           </div>
           
-          <a href="{{ url_for('responder_enquete', enquete_id=enquete.id) }}" class="btn btn-success">Responder Enquete</a>
+          {% if enquete.prazo_expirado %}
+            <span class="badge text-bg-danger p-2">Prazo expirado</span>
+          {% else %}
+            <a href="{{ url_for('responder_enquete', enquete_id=enquete.id) }}" class="btn btn-success">Responder Enquete</a>
+          {% endif %}
         </div>
       {% endfor %}
 

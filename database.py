@@ -23,6 +23,7 @@ class Database:
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           titulo TEXT NOT NULL,
           perguntas TEXT,
+          prazo DATE NOT NULL,
           usuario_id INTEGER NOT NULL,
           criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
           FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
@@ -135,8 +136,9 @@ class Database:
       enquetes = [{'id': enquete[0],
                   'titulo': enquete[1],
                   'perguntas': enquete[2],
-                  'usuario_id': enquete[3],
-                  'criado_em': datetime.strptime(enquete[4], '%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y')}
+                  'prazo': datetime.strptime(enquete[3], '%Y-%m-%d').strftime('%d/%m/%Y'),
+                  'usuario_id': enquete[4],
+                  'criado_em': datetime.strptime(enquete[5], '%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y')}
                   for enquete in enquetes]
 
       conn.close()
@@ -153,7 +155,7 @@ class Database:
       cursor = conn.cursor()
 
       cursor.execute('''
-        SELECT e.id, e.titulo, e.criado_em
+        SELECT e.id, e.titulo, e.criado_em, e.prazo
         FROM enquetes e
         WHERE e.id NOT IN (
           SELECT DISTINCT enquete_id
@@ -167,6 +169,7 @@ class Database:
       # mapeie enquetes para um objeto com os ids, títulos e perguntas
       enquetes = [{'id': enquete[0],
                   'titulo': enquete[1],
+                  'prazo': datetime.strptime(enquete[3], '%Y-%m-%d').strftime('%d/%m/%Y'),
                   'criado_em': datetime.strptime(enquete[2], '%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y')}
                   for enquete in enquetes]
 
@@ -222,19 +225,20 @@ class Database:
         'id': enquete[0],
         'titulo': enquete[1],
         'perguntas': enquete[2].split(','),
-        'usuario_id': enquete[3],
-        'criado_em': datetime.strptime(enquete[4], '%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y')
+        'prazo': datetime.strptime(enquete[3], '%Y-%m-%d').strftime('%d/%m/%Y'),
+        'usuario_id': enquete[4],
+        'criado_em': datetime.strptime(enquete[5], '%Y-%m-%d %H:%M:%S').strftime('%d/%m/%Y')
       }
     else:
       return None
 
-  def criar_enquete(self, titulo, perguntas, usuario_id):
+  def criar_enquete(self, titulo, perguntas, usuario_id, prazo):
     """Cria uma nova enquete no banco de dados"""
     try:
       conn = self._connect()
       cursor = conn.cursor()
 
-      cursor.execute('INSERT INTO enquetes (titulo, perguntas, usuario_id, criado_em) VALUES (?, ?, ?, ?)', (titulo, ','.join(perguntas), usuario_id, datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
+      cursor.execute('INSERT INTO enquetes (titulo, perguntas, usuario_id, criado_em, prazo) VALUES (?, ?, ?, ?, ?)', (titulo, ','.join(perguntas), usuario_id, datetime.now().strftime('%Y-%m-%d %H:%M:%S'), prazo))
 
       conn.commit()
       conn.close()
