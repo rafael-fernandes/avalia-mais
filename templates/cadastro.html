@@ -1,9 +1,9 @@
 {% extends "index.html" %}
 
-{% block pagetitle %}Login{% endblock %}
+{% block pagetitle %}Cadastro{% endblock %}
 
 {% block content %}
-  <div class="container h-100">
+  <div class="container py-5">
     <div class="d-flex w-100 h-100 justify-content-center align-items-center">
       <div>
         <div class="text-center pb-4">
@@ -33,6 +33,18 @@
               <input type="password" class="form-control mt-2" id="password" name="senha">
 
               <div id="password-error" class="mt-2" style="display: none;"><strong class="text-danger">Este campo é obrigatório.</strong></div>
+            </div>
+
+            <div class="pt-3">
+              <div class="text-muted">Sua senha deve conter, pelo menos:</div>
+
+              <ul class="text-muted mb-0 mt-2" style="list-style-type: none; padding-left: 0;">
+                <li><span id="length-check"><i data-lucide="x" class="text-danger"></i></span> 10 caracteres</li>
+                <li><span id="number-check"><i data-lucide="x" class="text-danger"></i></span> 1 número</li>
+                <li><span id="uppercase-check"><i data-lucide="x" class="text-danger"></i></span> 1 letra maiúscula</li>
+                <li><span id="lowercase-check"><i data-lucide="x" class="text-danger"></i></span> 1 letra minúscula</li>
+                <li><span id="symbol-check"><i data-lucide="x" class="text-danger"></i></span> 1 símbolo</li>
+              </ul>
             </div>
 
             <div class="form-group pt-4">
@@ -80,6 +92,43 @@
   </div>
 
   <script>
+    function validatePassword() {
+      let isValid = true;
+
+      // Validate Password
+      const password = document.getElementById('password').value;
+      const passwordError = document.getElementById('password-error');
+      const criteria = [
+        { regex: /.{10,}/, element: document.getElementById('length-check') }, // 10 caracteres
+        { regex: /[0-9]/, element: document.getElementById('number-check') }, // 1 número
+        { regex: /[A-Z]/, element: document.getElementById('uppercase-check') }, // 1 letra maiúscula
+        { regex: /[a-z]/, element: document.getElementById('lowercase-check') }, // 1 letra minúscula
+        { regex: /[^A-Za-z0-9]/, element: document.getElementById('symbol-check') } // 1 caractere especial
+      ];
+      
+      criteria.forEach(({ regex, element }) => {
+        if (regex.test(password)) {
+          element.innerHTML = '<i data-lucide="check" class="text-success"></i>';
+        } else {
+          element.innerHTML = '<i data-lucide="x" class="text-danger"></i>';
+          isValid = false;
+        }
+      });
+
+      lucide.createIcons();
+      
+      if (password === '') {
+        passwordError.style.display = 'block';
+        isValid = false;
+      } else {
+        passwordError.style.display = 'none';
+      }
+
+      return isValid;
+    }
+
+    document.getElementById('password').addEventListener('input', validatePassword);
+
     function validateForm() {
       let isValid = true;
 
@@ -109,17 +158,10 @@
         emailError.style.display = 'none';
       }
 
-      // Validate Password
-      const password = document.getElementById('password').value;
-      const passwordError = document.getElementById('password-error');
-      if (password === '') {
-        passwordError.style.display = 'block';
-        isValid = false;
-      } else {
-        passwordError.style.display = 'none';
-      }
+      isValid = validatePassword();
 
       // Validate Password Confirmation
+      const password = document.getElementById('password').value;
       const passwordConfirmation = document.getElementById('password-confirmation').value;
       const passwordConfirmationError = document.getElementById('password-confirmation-error');
       if (password !== passwordConfirmation) {
